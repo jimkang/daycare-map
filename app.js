@@ -8,7 +8,7 @@ L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images'
 var bostonPoint = [42.3725, -71.1266];
 var somervillePoint = [42.39, -71.1];
 
-var map = L.map('map').setView(somervillePoint, 14);
+var map = L.map('map').setView(bostonPoint, 14);
 var publicAccessToken = 'pk.eyJ1IjoiZGVhdGhtdG4iLCJhIjoiY2lpdzNxaGFqMDAzb3Uya25tMmR5MDF6ayJ9.ILyMA2rUQZ6nzfa2xT41KQ';
 var tileURL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' +
   publicAccessToken;
@@ -30,11 +30,24 @@ function addToTree(d) {
   tree.insert([d.lng, d.lat, d.lng, d.lat, d.providerid]);
 }
 
-var somervilleBox = [
-  -71.136017, 42.372822,
-  -71.077634, 42.418447
-];
+map.on('viewreset', updateMarkers);
+map.on('dragend', updateMarkers);
 
-var inViewProviders = tree.search(somervilleBox)
+updateMarkers();
 
-renderDataPoints(L, map, inViewProviders);
+function updateMarkers() {
+  console.log(map.getBounds().toBBoxString());
+  var inViewProviders = tree.search(getSearchBounds(map));
+  renderDataPoints(L, map, inViewProviders);
+}
+
+function getSearchBounds(map) {
+  var bounds = map.getBounds();
+  var sw = bounds.getSouthWest();
+  var ne = bounds.getNorthEast();
+
+  return [
+    sw.lng, sw.lat,
+    ne.lng, ne.lat
+  ];
+}
