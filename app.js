@@ -1,6 +1,6 @@
 var leaflet = require('leaflet');
 var rbush = require('rbush');
-var renderDataPoints = require('./render-data-points');
+var createRenderDataPoints = require('./render-data-points');
 var geocodedProviders = require('./geocoded-providers-summarized.json');
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
@@ -33,12 +33,17 @@ function addToTree(d) {
 map.on('viewreset', updateMarkers);
 map.on('dragend', updateMarkers);
 
+var renderDataPoints = createRenderDataPoints({
+  L: L,
+  map: map
+});
+
 updateMarkers();
 
 function updateMarkers() {
   console.log(map.getBounds().toBBoxString());
   var inViewProviders = tree.search(getSearchBounds(map));
-  renderDataPoints(L, map, inViewProviders);
+  renderDataPoints(inViewProviders);
 }
 
 function getSearchBounds(map) {
