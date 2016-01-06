@@ -1,4 +1,5 @@
 var DataJoiner = require('data-joiner');
+var makeRequest = require('basic-browser-request');
 
 function createRenderDataPoints(createOpts) {
   var map;
@@ -26,10 +27,28 @@ function createRenderDataPoints(createOpts) {
     var id = getProviderIdFromRbushPoint(rbushPoint);
     markersForProviderIds[id] = marker;
 
-    marker.bindPopup(
-      '<b>Provider ID:</b> ' + id
-    )
-    .openPopup();
+    marker.on('click', showProviderDetails);
+
+    function showProviderDetails() {
+      // TODO: Move the getting out of here.
+      var requestHandle = makeRequest(
+        {
+          url: 'http://localhost:4999/providers/' + id,
+          method: 'GET',
+          mimeType: 'application/json',
+          onData: function onData(data) {
+            console.log(data);
+            showProviderPopup(data);
+            // chunksReceived += 1;
+          }
+        },
+        noOp
+      );
+    }
+
+    function showProviderPopup(text) {
+      marker.bindPopup(text).openPopup();
+    }
   }
 
   function removeDataPoint(rbushPoint) {
@@ -50,6 +69,9 @@ function getProviderIdFromRbushPoint(point) {
 
 function getLatLngFromRbushPoint(point) {
   return [point[1], point[0]];
+}
+
+function noOp() {
 }
 
 module.exports = createRenderDataPoints;
