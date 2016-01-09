@@ -2,6 +2,8 @@ var leaflet = require('leaflet');
 var rbush = require('rbush');
 var createRenderDataPoints = require('./render-data-points');
 var geocodedProviders = require('./geocoded-providers-summarized.json');
+var ProviderStore = require('./provider-store');
+var getProviderIdFromRbushPoint = require('./rbush-provider-accessors').getProviderIdFromRbushPoint;
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
 
@@ -24,6 +26,7 @@ var tileLayerOpts = {
 L.tileLayer(tileURL, tileLayerOpts).addTo(map);
 
 var tree = rbush(9);
+var providerStore = ProviderStore();
 
 geocodedProviders.forEach(addToTree);
 
@@ -44,6 +47,7 @@ updateMarkers();
 function updateMarkers() {
   console.log(map.getBounds().toBBoxString());
   var inViewProviders = tree.search(getSearchBounds(map));
+  providerStore.loadProviders(inViewProviders.map(getProviderIdFromRbushPoint));
   renderDataPoints(inViewProviders);
 }
 

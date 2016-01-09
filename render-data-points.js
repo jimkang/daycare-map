@@ -1,5 +1,7 @@
 var DataJoiner = require('data-joiner');
 var makeRequest = require('basic-browser-request');
+var accessors = require('./rbush-provider-accessors');
+var getProviderIdFromRbushPoint = accessors.getProviderIdFromRbushPoint;
 
 function createRenderDataPoints(createOpts) {
   var map;
@@ -23,7 +25,8 @@ function createRenderDataPoints(createOpts) {
   }
 
   function renderDataPoint(rbushPoint) {
-    var marker = L.marker(getLatLngFromRbushPoint(rbushPoint)).addTo(map);
+    var marker = L.marker(accessors.getLatLngFromRbushPoint(rbushPoint))
+      .addTo(map);
     var id = getProviderIdFromRbushPoint(rbushPoint);
     markersForProviderIds[id] = marker;
 
@@ -61,14 +64,6 @@ function createRenderDataPoints(createOpts) {
   }
 
   return renderDataPoints;
-}
-
-function getProviderIdFromRbushPoint(point) {
-  return point[4];
-}
-
-function getLatLngFromRbushPoint(point) {
-  return [point[1], point[0]];
 }
 
 function noOp() {
