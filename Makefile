@@ -1,5 +1,5 @@
 test:
-	node tests/basictests.js
+	node tests/provider-store-tests.js
 
 run:
 	wzrd app.js:index.js -- \
