@@ -1,15 +1,17 @@
 var test = require('tape');
 var ProviderStore = require('../provider-store');
-var url = require('url');
-var callNextTick = require('call-next-tick');
 var level = require('level');
 var rimraf = require('rimraf');
+var MockMakeRequest = require('./fixtures/mock-make-request');
 
 var dbLocation = __dirname + '/test.db';
 
 rimraf.sync(dbLocation);
 
 test('Store test', function storeTest(t) {
+  var batchSize = 4;
+  var mockRequestChunkSize = 3;
+
   var mockProvidersForIds = {
     a: {
       providerid: 'a',
@@ -45,32 +47,10 @@ test('Store test', function storeTest(t) {
     }
   };
 
-
-  function getMockProviderJSONForId(id) {
-    return JSON.stringify(mockProvidersForIds[id]);
-  }
-
-  var mockRequestChunkSize = 3;
-  var batchSize = 4;
-
-  function mockMakeRequest(reqOpts) {
-    var parsed = url.parse(reqOpts.url);
-    var idsToSend = parsed.pathname.split('/').pop().split(',');
-
-    callNextTick(sendNextBatch);
-
-    function sendNextBatch() {      
-      var currentBatchIds = idsToSend.slice(0, mockRequestChunkSize);
-      idsToSend.splice(0, mockRequestChunkSize);
-      // console.log('currentBatchIds', currentBatchIds);
-
-      reqOpts.onData(currentBatchIds.map(getMockProviderJSONForId).join('\n'));
-
-      if (idsToSend.length > 0) {
-        callNextTick(sendNextBatch);
-      }
-    }
-  }
+  var mockMakeRequest = MockMakeRequest({
+    mockRequestChunkSize: mockRequestChunkSize,
+    providersForIds: mockProvidersForIds
+  });
 
   var db = level(
     dbLocation,
