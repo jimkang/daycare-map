@@ -11,7 +11,6 @@ function createGetBatchUpdateCommands(opts) {
   // the database.
   function getBatchUpdateCommands(providers, enc, cb) {
     var commands = [];
-debugger;
     var q = queue(10);
     providers.forEach(queueParamGen);
     q.awaitAll(passCommmands);
@@ -24,7 +23,6 @@ debugger;
       providerIsSaved(provider, decideParams);
 
       function decideParams(error, isSaved) {
-        debugger;
         if (error) {
           // Not stopping for errors.
           console.log(error, error.stack);

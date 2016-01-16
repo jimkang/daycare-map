@@ -51,7 +51,7 @@ test('Store test', function storeTest(t) {
   }
 
   var mockRequestChunkSize = 3;
-  var mockBatchSize = 4;
+  var batchSize = 4;
 
   function mockMakeRequest(reqOpts) {
     var parsed = url.parse(reqOpts.url);
@@ -62,6 +62,7 @@ test('Store test', function storeTest(t) {
     function sendNextBatch() {      
       var currentBatchIds = idsToSend.slice(0, mockRequestChunkSize);
       idsToSend.splice(0, mockRequestChunkSize);
+      // console.log('currentBatchIds', currentBatchIds);
 
       reqOpts.onData(currentBatchIds.map(getMockProviderJSONForId).join('\n'));
 
@@ -81,7 +82,7 @@ test('Store test', function storeTest(t) {
   var store = ProviderStore({
     makeRequest: mockMakeRequest,
     db: db,
-    batchSize: mockBatchSize
+    batchSize: batchSize
   });
 
   var checkAllBatchesCallCount = 0;
@@ -97,6 +98,7 @@ test('Store test', function storeTest(t) {
   function checkBatch1() {
     checkBatch1CallCount += 1;
     t.pass('Batch 1 event triggered.');
+    debugger;
     store.removeListener('batch', checkBatch1);
     store.getProviders(['a', 'b', 'c', 'd'], checkGet1);
   }
@@ -106,7 +108,16 @@ test('Store test', function storeTest(t) {
     if (error) {
       console.log(error, error.stack);
     }
-    // TODO: Check providers.
+    
+    t.equal(
+      providers.length,
+      mockRequestChunkSize,
+      'Correct number of providers returned for get 1.'
+    );
+    t.deepEqual(providers[0], mockProvidersForIds['a'], 'Provider a gotten.');
+    t.deepEqual(providers[1], mockProvidersForIds['b'], 'Provider b gotten.');
+    t.deepEqual(providers[2], mockProvidersForIds['c'], 'Provider c gotten.');
+
     store.on('batch', checkBatch2);
     store.loadProviders(['d', 'e', 'f', 'g', 'h']);
   }
@@ -122,9 +133,25 @@ test('Store test', function storeTest(t) {
 
   function checkGet2(error, providers) {
     t.ok(!error, 'No error during get 2.');
-    // TODO: Check providers.
+
+    // mockRequestChunkSize is 4, but a-c were pushed in the previous batch, so
+    // c, in addition to d-f, should be available.
+    // The second time this is called, g-h should also be available, hence,
+    // different expected lengths each time.
+    t.equal(
+      providers.length,
+      checkBatch2CallCount === 1 ? 4: 5,
+      'Correct number of providers returned for get 2.'
+    );
+
+    t.deepEqual(providers[0], mockProvidersForIds['c'], 'Provider c gotten.');
+    t.deepEqual(providers[1], mockProvidersForIds['d'], 'Provider d gotten.');
+    t.deepEqual(providers[2], mockProvidersForIds['e'], 'Provider e gotten.');
+    t.deepEqual(providers[3], mockProvidersForIds['f'], 'Provider f gotten.');
 
     if (checkBatch2CallCount === 2) {
+      t.deepEqual(providers[4], mockProvidersForIds['g'], 'Provider g gotten.');
+
       t.equal(checkBatch1CallCount, 1, 'One-time event listener called once.');
       t.equal(checkBatch2CallCount, 2, 'Two-time event listener called twice.');
       t.equal(

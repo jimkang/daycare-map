@@ -49,11 +49,7 @@ function ProviderStore(opts) {
     );
 
     function writeToBatchCommandStream(data) {
-      var lines = data.split('\n');
-      console.log('lines count:', lines.length);
-      console.log('lines', lines);
-      debugger;
-      lines = compact(lines);
+      var lines = compact(data.split('\n'));
       var providers = lines.map(JSON.parse);
       batchCommandStream.write(providers);
     }
@@ -76,10 +72,19 @@ function ProviderStore(opts) {
   function getProviders(ids, done) {
     var q = queue(10);
     ids.forEach(queueGet);
-    q.awaitAll(done);
+    q.awaitAll(clean);
 
     function queueGet(id) {
       q.defer(forgivingGet, id);
+    }
+
+    function clean(error, providers) {
+      if (error) {
+        done(error);
+      }
+      else {
+        done(error, compact(providers));
+      }
     }
   }
 
