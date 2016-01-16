@@ -1,5 +1,6 @@
 var defaultMakeRequest = require('basic-browser-request');
 var compact = require('lodash.compact');
+process.hrtime = require('browser-process-hrtime');
 var LevelBatch = require('level-batch-stream');
 var createGetBatchUpdateCommands = require('./get-batch-update-commands');
 var through = require('through2');
@@ -13,11 +14,13 @@ function ProviderStore(opts) {
   var db;
   var makeRequest;
   var batchSize;
+  var apiHost;
 
   if (opts) {
     db = opts.db;
     makeRequest = opts.makeRequest;
     batchSize = opts.batchSize;
+    apiHost = opts.apiHost;
   }
 
   if (!makeRequest) {
@@ -25,9 +28,8 @@ function ProviderStore(opts) {
   }
 
   getBatchUpdateCommands = createGetBatchUpdateCommands(opts);
-  // var idsBeingWaitedOn = [];
 
-  function loadProviders(ids) {
+  function loadProviders(ids, done) {
     var batchCommandStream = through(
       batchCommandStreamOpts, getBatchUpdateCommands
     );    
@@ -40,12 +42,12 @@ function ProviderStore(opts) {
 
     makeRequest(
       {
-        url: 'http://localhost:4999/providers/' + ids.join(','),
+        url: apiHost + '/providers/' + ids.join(','),
         method: 'GET',
         mimeType: 'application/json; charset=UTF-8',
         onData: writeToBatchCommandStream
       },
-      noOp
+      done
     );
 
     function writeToBatchCommandStream(data) {

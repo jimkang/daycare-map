@@ -4,6 +4,9 @@ var createRenderDataPoints = require('./render-data-points');
 var geocodedProviders = require('./geocoded-providers-summarized.json');
 var ProviderStore = require('./provider-store');
 var getProviderIdFromRbushPoint = require('./rbush-provider-accessors').getProviderIdFromRbushPoint;
+var makeRequest = require('basic-browser-request');
+var levelup = require('levelup');
+var leveljs = require('level-js');
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
 
@@ -26,7 +29,22 @@ var tileLayerOpts = {
 L.tileLayer(tileURL, tileLayerOpts).addTo(map);
 
 var tree = rbush(9);
-var providerStore = ProviderStore();
+
+var providerStore = ((function setUpStore() {
+  var db = levelup(
+    'daycare',
+    {
+      db: leveljs,
+      valueEncoding: 'json'
+    }
+  );
+
+  return ProviderStore({
+    makeRequest: makeRequest,
+    db: db,
+    apiHost: 'http://localhost:4999'
+  });
+})());
 
 geocodedProviders.forEach(addToTree);
 
@@ -47,8 +65,20 @@ updateMarkers();
 function updateMarkers() {
   console.log(map.getBounds().toBBoxString());
   var inViewProviders = tree.search(getSearchBounds(map));
-  providerStore.loadProviders(inViewProviders.map(getProviderIdFromRbushPoint));
+  providerStore.loadProviders(
+    inViewProviders.map(getProviderIdFromRbushPoint),
+    logProviderLoadDone
+  );
   renderDataPoints(inViewProviders);
+}
+
+function logProviderLoadDone(error) {
+  if (error) {
+    console.log('Error while loading providers:', error);
+  }
+  else {
+    console.log('Successfully loaded providers.');
+  }
 }
 
 function getSearchBounds(map) {
