@@ -5,6 +5,7 @@ var LevelBatch = require('level-batch-stream');
 var createGetBatchUpdateCommands = require('./get-batch-update-commands');
 var through = require('through2');
 var queue = require('queue-async');
+var identifyMissingProviders = require('./identify-missing-providers');
 
 var batchCommandStreamOpts = {
   objectMode: true
@@ -30,30 +31,38 @@ function ProviderStore(opts) {
   getBatchUpdateCommands = createGetBatchUpdateCommands(opts);
 
   function loadProviders(ids, done) {
-    var batchCommandStream = through(
-      batchCommandStreamOpts, getBatchUpdateCommands
-    );    
-    batchCommandStream.on('error', logCommandStreamError);
-    batchCommandStream.pipe(new LevelBatch(db));
+    identifyMissingProviders(db, ids, makeRequestForMissingIds);
 
-    function logCommandStreamError(error) {
-      console.log(error, error.stack);
-    }
+    function makeRequestForMissingIds(error, missingIds) {
+      if (error) {
+        done(error);
+      }
+      else if (missingIds.length < 1) {
+        done();
+      }
+      else {
+        var batchCommandStream = through(
+          batchCommandStreamOpts, getBatchUpdateCommands
+        );    
+        batchCommandStream.on('error', logCommandStreamError);
+        batchCommandStream.pipe(new LevelBatch(db));
 
-    makeRequest(
-      {
-        url: apiHost + '/providers/' + ids.join(','),
-        method: 'GET',
-        mimeType: 'application/json; charset=UTF-8',
-        onData: writeToBatchCommandStream
-      },
-      done
-    );
+        makeRequest(
+          {
+            url: apiHost + '/providers/' + missingIds.join(','),
+            method: 'GET',
+            mimeType: 'application/json; charset=UTF-8',
+            onData: writeToBatchCommandStream
+          },
+          done
+        );
+      }
 
-    function writeToBatchCommandStream(data) {
-      var lines = compact(data.split('\n'));
-      var providers = lines.map(JSON.parse);
-      batchCommandStream.write(providers);
+      function writeToBatchCommandStream(data) {
+        var lines = compact(data.split('\n'));
+        var providers = lines.map(JSON.parse);
+        batchCommandStream.write(providers);
+      }
     }
   }
 
@@ -109,6 +118,11 @@ function ProviderStore(opts) {
     removeListener: removeListener,
     getProviders: getProviders
   };
+}
+
+
+function logCommandStreamError(error) {
+  console.log(error, error.stack);
 }
 
 module.exports = ProviderStore;

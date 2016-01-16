@@ -3,6 +3,7 @@ var ProviderStore = require('../provider-store');
 var level = require('level');
 var rimraf = require('rimraf');
 var MockMakeRequest = require('./fixtures/mock-make-request');
+var curry = require('lodash.curry');
 
 var dbLocation = __dirname + '/test.db';
 
@@ -49,7 +50,11 @@ test('Store test', function storeTest(t) {
 
   var mockMakeRequest = MockMakeRequest({
     mockRequestChunkSize: mockRequestChunkSize,
-    providersForIds: mockProvidersForIds
+    providersForIds: mockProvidersForIds,
+    reqOptsCheckers: [
+      checkReq1,
+      checkReq2
+    ]
   });
 
   var db = level(
@@ -75,6 +80,17 @@ test('Store test', function storeTest(t) {
 
   store.loadProviders(['a', 'b', 'c']);
 
+
+  function checkForIdInReq(ids, id) {
+    t.ok(ids.indexOf(id) !== -1, 'Request contains ' + id);
+  }
+
+  function checkReq1(reqOpts) {
+    var ids = getIdsFromURL(reqOpts.url);
+    t.equal(ids.length, 3, 'Request 1 has the correct number of ids.');
+    ['a', 'b', 'c'].forEach(curry(checkForIdInReq)(ids));
+  }
+
   function checkBatch1() {
     checkBatch1CallCount += 1;
     t.pass('Batch 1 event triggered.');
@@ -99,7 +115,16 @@ test('Store test', function storeTest(t) {
     t.deepEqual(providers[2], mockProvidersForIds['c'], 'Provider c gotten.');
 
     store.on('batch', checkBatch2);
-    store.loadProviders(['d', 'e', 'f', 'g', 'h']);
+    store.loadProviders(['b', 'c', 'd', 'e', 'f', 'g', 'h']);
+  }
+
+  function checkReq2(reqOpts) {
+    var ids = getIdsFromURL(reqOpts.url);
+    // Even though the loadProviders call includes b and c, those should
+    // already be loaded. No call should have to be made for those two.
+    // TODO: Expiration. Maybe indexedDB as expiration built-in?
+    t.equal(ids.length, 5, 'Request 2 has the correct number of ids.');
+    ['d', 'e', 'f', 'g', 'h'].forEach(curry(checkForIdInReq)(ids));
   }
 
   function checkBatch2() {
@@ -148,5 +173,18 @@ test('Store test', function storeTest(t) {
 
   function checkAllBatches() {
     checkAllBatchesCallCount += 1;
-  }  
+  }
+
 });
+
+function getIdsFromURL(url) {
+  var parts = url.split('/');
+  var ids;
+
+  if (parts.length > 0) {
+    idsString = parts[parts.length - 1];
+    ids = idsString.split(',');
+  }
+
+  return ids;
+}
