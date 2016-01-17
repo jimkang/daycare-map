@@ -1,72 +1,92 @@
 var DataJoiner = require('data-joiner');
-var makeRequest = require('basic-browser-request');
-var accessors = require('./rbush-provider-accessors');
-var getProviderIdFromRbushPoint = accessors.getProviderIdFromRbushPoint;
+var pluck = require('lodash.pluck');
+var accessor = require('accessor');
+var RenderProviderDetails = require('./render-provider-details');
 
 function createRenderDataPoints(createOpts) {
   var map;
   var L;
-  var markersForProviderIds = {};
+  var providerStore;
+  var geocodeStore;
 
   if (createOpts) {
     map = createOpts.map;
     L = createOpts.L;
+    providerStore = createOpts.providerStore;
+    geocodeStore = createOpts.geocodeStore;
   }
 
+  var markersForProviderIds = {};
   var joiner = DataJoiner({
-    keyFn: getProviderIdFromRbushPoint
+    keyFn: accessor('providerid')
   });
 
-  function renderDataPoints(rbushPoints) {
-    joiner.update(rbushPoints);
+  function render() {
+    // console.log(map.getBounds().toBBoxString());
+    var bounds = getSearchBounds(map);
+    var providerGeocodes = geocodeStore.getProviderGeocodesInView(bounds);
+
+    providerStore.loadProviders(
+      pluck(providerGeocodes, 'providerid'),
+      logProviderLoadDone
+    );
+    renderDataPoints(providerGeocodes);
+  }
+
+  function renderDataPoints(providerGeocodes) {
+    joiner.update(providerGeocodes);
 
     joiner.exit().forEach(removeDataPoint);
     joiner.enter().forEach(renderDataPoint);
   }
 
-  function renderDataPoint(rbushPoint) {
-    var marker = L.marker(accessors.getLatLngFromRbushPoint(rbushPoint))
+  function renderDataPoint(providerGeocode) {
+    var marker = L
+      .marker(providerGeocode.latLng)
       .addTo(map);
-    var id = getProviderIdFromRbushPoint(rbushPoint);
-    markersForProviderIds[id] = marker;
+    
+    markersForProviderIds[providerGeocode.providerid] = marker;
 
-    marker.on('click', showProviderDetails);
-
-    function showProviderDetails() {
-      // TODO: Move the getting out of here.
-      var requestHandle = makeRequest(
-        {
-          url: 'http://localhost:4999/providers/' + id,
-          method: 'GET',
-          mimeType: 'application/json',
-          onData: function onData(data) {
-            console.log(data);
-            showProviderPopup(data);
-            // chunksReceived += 1;
-          }
-        },
-        noOp
-      );
-    }
-
-    function showProviderPopup(text) {
-      marker.bindPopup(text).openPopup();
-    }
+    var renderProviderDetails = RenderProviderDetails({
+      marker: marker,
+      providerStore: providerStore,
+      providerid: providerGeocode.providerid
+    });
+    marker.on('click', renderProviderDetails);
   }
 
-  function removeDataPoint(rbushPoint) {
-    var id = getProviderIdFromRbushPoint(rbushPoint);
-    var marker = markersForProviderIds[id];
+  function removeDataPoint(providerGeocode) {
+    var marker = markersForProviderIds[providerGeocode.providerid];
     if (marker) {
       map.removeLayer(marker);
-      delete markersForProviderIds[id];
+      delete markersForProviderIds[providerGeocode.providerid];
     }
   }
 
-  return renderDataPoints;
+  return render;
 }
 
 function noOp() {
+}
+
+function getSearchBounds(map) {
+  var bounds = map.getBounds();
+  var sw = bounds.getSouthWest();
+  var ne = bounds.getNorthEast();
+
+  return [
+    sw.lng, sw.lat,
+    ne.lng, ne.lat
+  ];
+}
+
+function logProviderLoadDone(error) {
+  if (error) {
+    console.log('Error while loading providers:', error);
+  }
+  else {
+    console.log('Successfully loaded providers.');
+  }
 }
 
 module.exports = createRenderDataPoints;

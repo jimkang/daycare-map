@@ -1,12 +1,10 @@
 var leaflet = require('leaflet');
-var rbush = require('rbush');
-var createRenderDataPoints = require('./render-data-points');
-var geocodedProviders = require('./geocoded-providers-summarized.json');
-var ProviderStore = require('./provider-store');
-var getProviderIdFromRbushPoint = require('./rbush-provider-accessors').getProviderIdFromRbushPoint;
 var makeRequest = require('basic-browser-request');
 var levelup = require('levelup');
 var leveljs = require('level-js');
+var ProviderStore = require('./provider-store');
+var GeocodeStore = require('./geocode-store');
+var createRenderDataPoints = require('./render-data-points');
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
 
@@ -28,8 +26,6 @@ var tileLayerOpts = {
 
 L.tileLayer(tileURL, tileLayerOpts).addTo(map);
 
-var tree = rbush(9);
-
 var providerStore = ((function setUpStore() {
   var db = levelup(
     'daycare',
@@ -46,48 +42,16 @@ var providerStore = ((function setUpStore() {
   });
 })());
 
-geocodedProviders.forEach(addToTree);
+var geocodeStore = GeocodeStore();
 
-function addToTree(d) {
-  tree.insert([d.lng, d.lat, d.lng, d.lat, d.providerid]);
-}
-
-map.on('viewreset', updateMarkers);
-map.on('dragend', updateMarkers);
-
-var renderDataPoints = createRenderDataPoints({
+var render = createRenderDataPoints({
   L: L,
-  map: map
+  map: map,
+  providerStore: providerStore,
+  geocodeStore: geocodeStore
 });
 
-updateMarkers();
+render();
 
-function updateMarkers() {
-  console.log(map.getBounds().toBBoxString());
-  var inViewProviders = tree.search(getSearchBounds(map));
-  providerStore.loadProviders(
-    inViewProviders.map(getProviderIdFromRbushPoint),
-    logProviderLoadDone
-  );
-  renderDataPoints(inViewProviders);
-}
-
-function logProviderLoadDone(error) {
-  if (error) {
-    console.log('Error while loading providers:', error);
-  }
-  else {
-    console.log('Successfully loaded providers.');
-  }
-}
-
-function getSearchBounds(map) {
-  var bounds = map.getBounds();
-  var sw = bounds.getSouthWest();
-  var ne = bounds.getNorthEast();
-
-  return [
-    sw.lng, sw.lat,
-    ne.lng, ne.lat
-  ];
-}
+map.on('viewreset', render);
+map.on('dragend', render);
