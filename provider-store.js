@@ -2,7 +2,7 @@ var defaultMakeRequest = require('basic-browser-request');
 var compact = require('lodash.compact');
 process.hrtime = require('browser-process-hrtime');
 var LevelBatch = require('level-batch-stream');
-var createGetBatchUpdateCommands = require('./get-batch-update-commands');
+var getBatchUpdateCommands = require('./get-batch-update-commands');
 var through = require('through2');
 var queue = require('queue-async');
 var identifyMissingProviders = require('./identify-missing-providers');
@@ -28,8 +28,6 @@ function ProviderStore(opts) {
     makeRequest = defaultMakeRequest;
   }
 
-  getBatchUpdateCommands = createGetBatchUpdateCommands(opts);
-
   function loadProviders(ids, done) {
     identifyMissingProviders(db, ids, makeRequestForMissingIds);
 
@@ -45,7 +43,8 @@ function ProviderStore(opts) {
           batchCommandStreamOpts, getBatchUpdateCommands
         );    
         batchCommandStream.on('error', logCommandStreamError);
-        batchCommandStream.pipe(new LevelBatch(db));
+        batchCommandStream
+          .pipe(new LevelBatch(db));
 
         makeRequest(
           {
