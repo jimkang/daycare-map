@@ -10,7 +10,6 @@ var dbLocation = __dirname + '/test.db';
 rimraf.sync(dbLocation);
 
 test('Store test', function storeTest(t) {
-  var batchSize = 4;
   var mockRequestChunkSize = 3;
 
   var mockProvidersForIds = {
@@ -66,8 +65,7 @@ test('Store test', function storeTest(t) {
 
   var store = ProviderStore({
     makeRequest: mockMakeRequest,
-    db: db,
-    batchSize: batchSize
+    db: db
   });
 
   var checkAllBatchesCallCount = 0;
@@ -79,7 +77,6 @@ test('Store test', function storeTest(t) {
   store.on('error', checkError);
 
   store.loadProviders(['a', 'b', 'c']);
-
 
   function checkForIdInReq(ids, id) {
     t.ok(ids.indexOf(id) !== -1, 'Request contains ' + id);

@@ -14,13 +14,11 @@ var batchCommandStreamOpts = {
 function ProviderStore(opts) {
   var db;
   var makeRequest;
-  var batchSize;
   var apiHost;
 
   if (opts) {
     db = opts.db;
     makeRequest = opts.makeRequest;
-    batchSize = opts.batchSize;
     apiHost = opts.apiHost;
   }
 
@@ -42,9 +40,12 @@ function ProviderStore(opts) {
         var batchCommandStream = through(
           batchCommandStreamOpts, getBatchUpdateCommands
         );    
-        batchCommandStream.on('error', logCommandStreamError);
-        batchCommandStream
-          .pipe(new LevelBatch(db));
+        batchCommandStream.on('error', logError);
+
+        var levelBatch = new LevelBatch(db);
+        levelBatch.on('error', logError);
+
+        batchCommandStream.pipe(levelBatch);
 
         makeRequest(
           {
@@ -115,12 +116,13 @@ function ProviderStore(opts) {
     loadProviders: loadProviders,
     on: addListener,
     removeListener: removeListener,
-    getProviders: getProviders
+    getProviders: getProviders,
+    getProvider: forgivingGet
   };
 }
 
 
-function logCommandStreamError(error) {
+function logError(error) {
   console.log(error, error.stack);
 }
 
