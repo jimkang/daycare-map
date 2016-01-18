@@ -29,6 +29,7 @@
     "basic-browser-request": "^2.0.3",
     "browser-process-hrtime": "^0.1.2",
     "browserify": "^8.1.3",
+    "d3-selection": "^0.5.1",
     "data-joiner": "^1.0.0",
     "leaflet": "^0.7.7",
     "level-batch-stream": "^1.3.1",

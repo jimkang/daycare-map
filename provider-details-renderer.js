@@ -1,6 +1,10 @@
 var callNextTick = require('call-next-tick');
 var pluck = require('lodash.pluck');
-var pick = require('lodash.pick');
+var d3 = require('d3-selection');
+var accessor = require('accessor');
+
+var summaryRowKey = accessor();
+var getSummaryRowValue = accessor('value');
 
 function ProviderDetailsRenderer(createOpts) {
   var providerStore;
@@ -9,7 +13,9 @@ function ProviderDetailsRenderer(createOpts) {
     providerStore = createOpts.providerStore;
   }
 
-  var detailsEl = createDetailsEl();
+  var details = d3.select(document.createElement('div'))
+    .attr('id', 'provider-details');
+
   var currentlyRenderedProviderId;
 
   function renderDetailsForProviderId(providerid, done) {
@@ -32,26 +38,62 @@ function ProviderDetailsRenderer(createOpts) {
   }
 
   function renderDetailsForProvider(provider) {
-    var text;
-
     if (!provider) {
-      text = 'Waiting for provider details to come from the Internet…';
+      details.text('Waiting for provider details to come from the Internet…');
     }
     else {
-      var summary = pick(provider,
-        'Program Name', 'providerid', 'First Name', 'Last Name', 'Address',
-        'City', 'ZipCode', 'geodata'
-      );
-      text = JSON.stringify(summary, null, '  ');
-
+      renderSummary(provider);
       currentlyRenderedProviderId = provider.providerid;
     }
-    
-    if (text) {
-      detailsEl.textContent = text;
+
+    return details.node();
+  }
+
+  function renderSummary(provider) {
+    var summary = details.select('.summary');
+    if (summary.empty()) {
+      summary = details.append('ul').classed('summary', true);
     }
 
-    return detailsEl;
+    var summaryData = getSummaryData(provider);
+    var rowUpdate = summary.selectAll('li')
+      .data(summaryData.simpleRows, summaryRowKey);
+
+    rowUpdate.enter().append('li').classed(summaryRowKey, true);
+    rowUpdate.exit().remove();
+
+    rowUpdate.text(getSummaryRowValue);
+  }
+
+  function getSummaryData(provider) {
+    var simpleRows = [
+      {
+        id: 'program-name',
+        value: provider['Program Name']
+      },
+      {
+        id: 'contact-name',
+        value: provider['First Name'] + ' ' + provider['Last Name']
+      },
+      {
+        id: 'address',
+        value: provider['Address']
+      },
+      {
+        id: 'city',
+        value: provider['City']
+      },
+      {
+        id: 'zip',
+        value: provider['ZipCode']
+      }
+    ];
+
+    return {
+      latLng: provider.geodata.latLng,
+      providerid: provider.providerid,
+      simpleRows: simpleRows
+    };
   }
 
   function notifyOfChangedProviders(providers) {
@@ -68,12 +110,6 @@ function ProviderDetailsRenderer(createOpts) {
     renderDetailsForProvider: renderDetailsForProvider,
     notifyOfChangedProviders: notifyOfChangedProviders
   };
-}
-
-function createDetailsEl() {
-  var el = document.createElement('div');
-  el.classList.add('provider-details');
-  return el;
 }
 
 module.exports = ProviderDetailsRenderer;
