@@ -5,6 +5,8 @@ var leveljs = require('level-js');
 var ProviderStore = require('./provider-store');
 var GeocodeStore = require('./geocode-store');
 var createRenderDataPoints = require('./render-data-points');
+var ProviderDetailsRenderer = require('./provider-details-renderer');
+var pluck = require('lodash.pluck');
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
 
@@ -44,14 +46,24 @@ var providerStore = ((function setUpStore() {
 
 var geocodeStore = GeocodeStore();
 
+var providerDetailsRenderer = ProviderDetailsRenderer({
+  providerStore: providerStore
+});
+
 var render = createRenderDataPoints({
-  L: L,
+  L: leaflet,
   map: map,
   providerStore: providerStore,
-  geocodeStore: geocodeStore
+  geocodeStore: geocodeStore,
+  renderDetailsForProviderId: providerDetailsRenderer.renderDetailsForProviderId
 });
 
 render();
 
 map.on('viewreset', render);
 map.on('dragend', render);
+providerStore.on('batch', refreshProviderDetails);
+
+function refreshProviderDetails(newRecords) {
+  providerDetailsRenderer.notifyOfChangedProviders(pluck(newRecords, 'value'));
+}

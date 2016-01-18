@@ -30,6 +30,9 @@ function identifyMissingProviders(db, ids, done) {
     }
     else {
       done(error, missing);
+
+      // Uncomment to awkwardly simulate slow response from server.
+      // setTimeout(function () { done(error, missing); }, 10 * 1000);
     }
   }
 }

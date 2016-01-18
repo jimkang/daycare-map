@@ -1,19 +1,20 @@
 var DataJoiner = require('data-joiner');
 var pluck = require('lodash.pluck');
 var accessor = require('accessor');
-var RenderProviderDetails = require('./render-provider-details');
 
 function createRenderDataPoints(createOpts) {
   var map;
   var L;
   var providerStore;
   var geocodeStore;
+  var renderDetailsForProviderId;
 
   if (createOpts) {
     map = createOpts.map;
     L = createOpts.L;
     providerStore = createOpts.providerStore;
     geocodeStore = createOpts.geocodeStore;
+    renderDetailsForProviderId = createOpts.renderDetailsForProviderId;
   }
 
   var markersForProviderIds = {};
@@ -46,13 +47,20 @@ function createRenderDataPoints(createOpts) {
       .addTo(map);
     
     markersForProviderIds[providerGeocode.providerid] = marker;
+    marker.on('click', openDetails);
 
-    var renderProviderDetails = RenderProviderDetails({
-      marker: marker,
-      providerStore: providerStore,
-      providerid: providerGeocode.providerid
-    });
-    marker.on('click', renderProviderDetails);
+    function openDetails() {
+      renderDetailsForProviderId(providerGeocode.providerid, showPopup);
+    }
+
+    function showPopup(error, detailEl) {
+      if (error) {
+        console.log(error);
+      }
+      else {
+        marker.bindPopup(detailEl).openPopup();
+      }
+    }
   }
 
   function removeDataPoint(providerGeocode) {
