@@ -17,6 +17,11 @@ function createRenderDataPoints(createOpts) {
     renderDetailsForProviderId = createOpts.renderDetailsForProviderId;
   }
 
+  var markers = new L.MarkerClusterGroup({
+    disableClusteringAtZoom: 15
+  });
+  map.addLayer(markers);
+
   var markersForProviderIds = {};
   var joiner = DataJoiner({
     keyFn: accessor('providerid')
@@ -42,12 +47,12 @@ function createRenderDataPoints(createOpts) {
   }
 
   function renderDataPoint(providerGeocode) {
-    var marker = L
-      .marker(providerGeocode.latLng)
-      .addTo(map);
+    var marker = L.marker(providerGeocode.latLng);
     
     markersForProviderIds[providerGeocode.providerid] = marker;
     marker.on('click', openDetails);
+
+    markers.addLayer(marker);
 
     function openDetails() {
       renderDetailsForProviderId(providerGeocode.providerid, showPopup);
@@ -66,7 +71,7 @@ function createRenderDataPoints(createOpts) {
   function removeDataPoint(providerGeocode) {
     var marker = markersForProviderIds[providerGeocode.providerid];
     if (marker) {
-      map.removeLayer(marker);
+      markers.removeLayer(marker);
       delete markersForProviderIds[providerGeocode.providerid];
     }
   }

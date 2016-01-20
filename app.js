@@ -1,4 +1,5 @@
 var leaflet = require('leaflet');
+require('leaflet.markercluster');
 var makeRequest = require('basic-browser-request');
 var levelup = require('levelup');
 var leveljs = require('level-js');
@@ -20,8 +21,8 @@ var tileURL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token
 
 var tileLayerOpts = {
   attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-  maxZoom: 18,
-  minZoom: 12,
+  maxZoom: 20,
+  minZoom: 9,
   id: 'mapbox.streets',
   accessToken: publicAccessToken
 };
