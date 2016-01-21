@@ -18,7 +18,8 @@ function createRenderDataPoints(createOpts) {
   }
 
   var markers = new L.MarkerClusterGroup({
-    disableClusteringAtZoom: 15
+    disableClusteringAtZoom: 15,
+    showCoverageOnHover: false
   });
   map.addLayer(markers);
 
