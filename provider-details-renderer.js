@@ -90,7 +90,10 @@ function ProviderDetailsRenderer(createOpts) {
     ];
 
     return {
-      latLng: provider.geodata.latLng,
+      latLng: {
+        lat: provider.lat,
+        lng: provider.lng
+      },
       providerid: provider.providerid,
       simpleRows: simpleRows
     };
