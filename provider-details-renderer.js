@@ -59,7 +59,7 @@ function ProviderDetailsRenderer(createOpts) {
     var rowUpdate = summary.selectAll('li')
       .data(summaryData.simpleRows, summaryRowKey);
 
-    rowUpdate.enter().append('li').classed(summaryRowKey, true);
+    rowUpdate.enter().append('li');
     rowUpdate.exit().remove();
 
     rowUpdate.text(getSummaryRowValue);
