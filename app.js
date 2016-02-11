@@ -41,7 +41,8 @@ var providerStore = ((function setUpStore() {
   return ProviderStore({
     makeRequest: makeRequest,
     db: db,
-    apiHost: 'http://localhost:4999'
+    apiHost: 'http://45.55.32.243:4999'
+    // apiHost: 'http://localhost:4999'
   });
 })());
 
