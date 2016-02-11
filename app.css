@@ -5,3 +5,8 @@ body {
 #map {
   height: 480px;
 }
+
+.summary {
+  list-style-type: none;
+  padding-left: 0;
+}
