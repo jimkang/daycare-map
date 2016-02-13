@@ -1,6 +1,6 @@
 BROWSERIFY = browserify
 UGLIFY = node_modules/.bin/uglifyjs
-LASTSHA = $(git rev-parse HEAD)
+LASTSHA=$$(git rev-parse HEAD)
 
 test:
 	node tests/provider-store-tests.js
