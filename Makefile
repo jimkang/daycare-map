@@ -14,5 +14,8 @@ run-plain:
 build:
 	$(BROWSERIFY) app.js | $(UGLIFY) -c -m -o index.js
 
-pushall: build
+commit-build: build
+	git commit -a -m"Build for $(git rev-parse HEAD)."
+
+pushall: commit-build
 	git push origin gh-pages
