@@ -50,6 +50,7 @@ function ProviderDetailsRenderer(createOpts) {
   }
 
   function renderSummary(provider) {
+    details.text('');
     var summary = details.select('.summary');
     if (summary.empty()) {
       summary = details.append('ul').classed('summary', true);
