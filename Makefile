@@ -1,5 +1,6 @@
 BROWSERIFY = browserify
 UGLIFY = node_modules/.bin/uglifyjs
+LASTSHA = $(git rev-parse HEAD)
 
 test:
 	node tests/provider-store-tests.js
@@ -15,7 +16,7 @@ build:
 	$(BROWSERIFY) app.js | $(UGLIFY) -c -m -o index.js
 
 commit-build: build
-	git commit -a -m"Build for $(git rev-parse HEAD)."
+	git commit -a -m"Build for $(LASTSHA)."
 
 pushall: commit-build
 	git push origin gh-pages

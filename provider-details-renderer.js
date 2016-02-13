@@ -1,10 +1,7 @@
 var callNextTick = require('call-next-tick');
 var pluck = require('lodash.pluck');
 var d3 = require('d3-selection');
-var accessor = require('accessor');
-
-var summaryRowKey = accessor();
-var getSummaryRowValue = accessor('value');
+var renderSummary = require('./render-summary');
 
 function ProviderDetailsRenderer(createOpts) {
   var providerStore;
@@ -42,28 +39,11 @@ function ProviderDetailsRenderer(createOpts) {
       details.text('Waiting for provider details to come from the Internet…');
     }
     else {
-      renderSummary(provider);
+      renderSummary(getSummaryData(provider), details);
       currentlyRenderedProviderId = provider.providerid;
     }
 
     return details.node();
-  }
-
-  function renderSummary(provider) {
-    details.text('');
-    var summary = details.select('.summary');
-    if (summary.empty()) {
-      summary = details.append('ul').classed('summary', true);
-    }
-
-    var summaryData = getSummaryData(provider);
-    var rowUpdate = summary.selectAll('li')
-      .data(summaryData.simpleRows, summaryRowKey);
-
-    rowUpdate.enter().append('li');
-    rowUpdate.exit().remove();
-
-    rowUpdate.text(getSummaryRowValue);
   }
 
   function getSummaryData(provider) {
