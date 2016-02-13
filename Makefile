@@ -14,5 +14,5 @@ run-plain:
 build:
 	$(BROWSERIFY) app.js | $(UGLIFY) -c -m -o index.js
 
-pushall:
-	git push origin master && git push origin gh-pages
+pushall: build
+	git push origin gh-pages
