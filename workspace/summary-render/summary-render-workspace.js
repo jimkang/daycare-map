@@ -1,8 +1,10 @@
 var renderSummary = require('../../render-summary');
 var getSummaryDataFromProvider = require('../../get-summary-data-from-provider');
 var d3 = require('d3-selection');
+var StrokeRouter= require('strokerouter');
 
 var details = d3.select('#provider-details');
+var providerIndex = 0;
 
 var summaryDataSamples = [
   {"providerid":"3386","Program Name":"AGUIAR, LINDA FIGUEIREDO","Capacity":"8","First Licensed On":"08/13/2009","Most Recently Renewed":"08/13/2012","EEC Regional Licensing Office":"1 Washington Street, Suite 20  Taunton 02780508-828-5025","EEC Licensor":"Celina Mendes","Type of care":"Family Child Care","First Name":"LINDA FIGUEIREDO","Last Name":"AGUIAR","Telephone":"5088241134","Address":"950 GLEBE ST","City":"TAUNTON","State":"MA","ZipCode":"02780-5155","Child Care Resource Referral Agency (CCR&R)":"Child Care Works","CCR&R Phone":"508-999-9930","CC&RR Website":"www.paceccw.org","lat":41.896415,"lng":-71.171073},
@@ -77,6 +79,19 @@ var summaryDataSamples = [
   {"providerid":"4760","Program Name":"Honey Tree Nursery School","Capacity":"18","First Licensed On":"11/05/1981","Most Recently Renewed":"02/14/2014","EEC Regional Licensing Office":"1 Washington Street, Suite 20  Taunton 02780508-828-5025","EEC Licensor":"Amanda Desrosiers","Type of care":"Large Group and School Age Child Care (Group Child Care)","First Name":"Mary","Last Name":"Riley","Telephone":"5088235611","Address":"645 Locust St","City":"Raynham","State":"MA","ZipCode":"02767-1114","Child Care Resource Referral Agency (CCR&R)":"Child Care Works","CCR&R Phone":"508-999-9930","CC&RR Website":"www.paceccw.org","lat":41.922349,"lng":-71.017802},
 ];
 
-var summaryData = getSummaryDataFromProvider(summaryDataSamples[4]);
+function renderDataAtIndex(i) {
+  renderSummary(getSummaryDataFromProvider(summaryDataSamples[i]), details);
+}
 
-renderSummary(summaryData, details);
+var strokeRouter = StrokeRouter(document)
+strokeRouter.routeKeyUp('rightArrow', null, renderNextProvider);
+
+function renderNextProvider() {
+  providerIndex += 1;
+  if (providerIndex >= summaryDataSamples.length) {
+    providerIndex = 0;
+  }
+  renderDataAtIndex(providerIndex);
+}
+
+renderDataAtIndex(providerIndex);
