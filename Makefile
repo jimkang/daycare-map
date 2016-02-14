@@ -12,6 +12,9 @@ run:
 run-plain:
 	python -m SimpleHTTPServer
 
+run-summary-workspace:
+	cd workspace/summary-render && wzrd summary-render-workspace.js -- -d
+
 build:
 	$(BROWSERIFY) app.js | $(UGLIFY) -c -m -o index.js
 
