@@ -19,7 +19,7 @@ build:
 	$(BROWSERIFY) app.js | $(UGLIFY) -c -m -o index.js
 
 commit-build: build
-	git commit -a -m"Build for $(LASTSHA)."
+	git commit -a -m"Build for $(LASTSHA)." || echo "No new build needed."
 
 pushall: commit-build
 	git push origin gh-pages
