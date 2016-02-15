@@ -1,5 +1,11 @@
 body {
-  font-family: "helvetica neue";
+  font-family: "helvetica neue", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #333;
 }
 
 #map {
@@ -9,4 +15,20 @@ body {
 .summary {
   list-style-type: none;
   padding-left: 0;
+  font-family: Georgia, serif;
+  font-size: larger;
+}
+
+.summary #program-name {
+  font-size: larger;
+}
+
+.summary #type {
+  font-size: smaller;
+  padding-bottom: 1em;
+}
+
+.provider-phone {
+  font-family: Georgia;
+  font-size: large;
 }

@@ -1,20 +1,26 @@
+var toTitleCase = require('titlecase');
+
 function getSummaryDataFromProvider(provider) {
   var simpleRows = [
     {
       id: 'program-name',
-      value: provider['Program Name']
+      value: normalize(provider['Program Name'])
     },
     {
-      id: 'contact-name',
-      value: provider['First Name'] + ' ' + provider['Last Name']
+      id: 'type',
+      value: provider['Type of care']
     },
+    // {
+    //   id: 'contact-name',
+    //   value: provider['First Name'] + ' ' + provider['Last Name']
+    // },
     {
       id: 'address',
-      value: provider['Address']
+      value: normalize(provider['Address'])
     },
     {
-      id: 'city',
-      value: provider['City']
+      id: 'city-and-state',
+      value: normalize(provider['City']) + ', ' + 'MA'
     },
     {
       id: 'zip',
@@ -28,8 +34,13 @@ function getSummaryDataFromProvider(provider) {
       lng: provider.lng
     },
     providerid: provider.providerid,
-    simpleRows: simpleRows
+    simpleRows: simpleRows,
+    phone: provider['Telephone']
   };
+}
+
+function normalize(s) {
+  return toTitleCase(s.toLowerCase());
 }
 
 module.exports = getSummaryDataFromProvider;

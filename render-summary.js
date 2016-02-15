@@ -11,8 +11,8 @@ function renderSummary(summaryData, detailsSel) {
 
   var rowUpdate = summary.selectAll('li')
     .data(summaryData.simpleRows, summaryRowKey);
-
   rowUpdate.enter().append('li');
+  rowUpdate.attr('id', summaryRowKey);
   rowUpdate.exit().remove();
 
   rowUpdate.text(getSummaryRowValue);

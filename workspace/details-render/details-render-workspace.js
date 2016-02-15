@@ -1,5 +1,6 @@
 var renderSummary = require('../../render-summary');
-var getSummaryDataFromProvider = require('../../get-summary-data-from-provider');
+// var getSummaryDataFromProvider = require('../../get-summary-data-from-provider');
+var renderDetailsForProvider = require('../../render-details-for-provider');
 var d3 = require('d3-selection');
 var StrokeRouter= require('strokerouter');
 
@@ -80,7 +81,7 @@ var summaryDataSamples = [
 ];
 
 function renderDataAtIndex(i) {
-  renderSummary(getSummaryDataFromProvider(summaryDataSamples[i]), details);
+  renderDetailsForProvider(summaryDataSamples[i], details);
 }
 
 var strokeRouter = StrokeRouter(document)

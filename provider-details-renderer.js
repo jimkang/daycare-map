@@ -1,8 +1,7 @@
 var callNextTick = require('call-next-tick');
 var pluck = require('lodash.pluck');
 var d3 = require('d3-selection');
-var renderSummary = require('./render-summary');
-var getSummaryDataFromProvider = require('./get-summary-data-from-provider');
+var renderDetailsForProvider = require('./render-details-for-provider');
 
 function ProviderDetailsRenderer(createOpts) {
   var providerStore;
@@ -30,21 +29,9 @@ function ProviderDetailsRenderer(createOpts) {
       }
       else {
         currentlyRenderedProviderId = providerid;
-        done(null, renderDetailsForProvider(provider));
+        done(null, renderDetailsForProvider(provider, details));
       }
     }
-  }
-
-  function renderDetailsForProvider(provider) {
-    if (!provider) {
-      details.text('Waiting for provider details to come from the Internet…');
-    }
-    else {
-      renderSummary(getSummaryDataFromProvider(provider), details);
-      currentlyRenderedProviderId = provider.providerid;
-    }
-
-    return details.node();
   }
 
   function notifyOfChangedProviders(providers) {
@@ -58,7 +45,7 @@ function ProviderDetailsRenderer(createOpts) {
 
   return {
     renderDetailsForProviderId: renderDetailsForProviderId,
-    renderDetailsForProvider: renderDetailsForProvider,
+    // renderDetailsForProvider: renderDetailsForProvider,
     notifyOfChangedProviders: notifyOfChangedProviders
   };
 }

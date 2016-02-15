@@ -45,6 +45,7 @@
     "rbush": "^1.4.2",
     "strokerouter": "^2.0.0",
     "through2": "^2.0.0",
+    "titlecase": "^1.0.2",
     "uglify-js": "^2.4.17"
   }
 }
