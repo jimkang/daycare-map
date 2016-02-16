@@ -10,8 +10,15 @@ a {
 }
 
 #map {
-  height: 80%;
   border-bottom: 1px solid hsla(200, 80%, 60%, 0.25);
+}
+
+.most-of-the-way-height {
+  height: 80%;  
+}
+
+.full-height {
+  height: 100%;
 }
 
 .summary {
@@ -43,7 +50,7 @@ a {
   margin-bottom: 4em;
 }
 
-#colophon-link {
+.relaxed-link {
   cursor: pointer;
   font-weight: 500;
 }
