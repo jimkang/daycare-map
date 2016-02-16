@@ -1,5 +1,6 @@
 body {
   font-family: "helvetica neue", sans-serif;
+  margin: 0;
 }
 
 a {
@@ -10,6 +11,7 @@ a {
 
 #map {
   height: 80%;
+  border-bottom: 1px solid hsla(200, 80%, 60%, 0.25);
 }
 
 .summary {
@@ -32,3 +34,25 @@ a {
   font-family: Georgia;
   font-size: large;
 }
+
+.explanation {
+  margin: 3em;
+}
+
+#introduction {
+  margin-bottom: 4em;
+}
+
+#colophon-link {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.invisible {
+   opacity: 0;  
+}
+
+.visible {
+  opacity: 1;
+}
+

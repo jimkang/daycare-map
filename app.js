@@ -8,6 +8,7 @@ var GeocodeStore = require('./geocode-store');
 var createRenderDataPoints = require('./render-data-points');
 var ProviderDetailsRenderer = require('./provider-details-renderer');
 var pluck = require('lodash.pluck');
+var ColophonShower = require('./colophon-shower');
 
 L.Icon.Default.imagePath = 'http://api.tiles.mapbox.com/mapbox.js/v2.2.1/images';
 
@@ -65,6 +66,8 @@ render();
 map.on('viewreset', render);
 map.on('dragend', render);
 providerStore.on('batch', refreshProviderDetails);
+
+ColophonShower();
 
 function refreshProviderDetails(newRecords) {
   providerDetailsRenderer.notifyOfChangedProviders(pluck(newRecords, 'value'));

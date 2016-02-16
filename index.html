@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>daycare-map</title>
+  <title>Massachusetts Daycare Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
   <link rel="stylesheet" href="app.css"></link>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
@@ -9,6 +9,25 @@
 <body>
 
 <div id="map"></div>
+
+<div class="explanation">
+  <div id="introduction">
+    <p>
+      This is a map of daycare providers available in the state of Massachusetts. You can drag to pan the map around and you can use the + and - buttons to zoom in and out. If you see a daycare provider at a location you are interested in, you can click or tap the marker to get more information about it.
+    </p>
+  </div>
+
+  <a id="colophon-link" class="visible">About this app</a>
+
+  <div id="colophon" class="invisible">
+    <p >
+      This map app was built with data from the <a href="http://www.eec.state.ma.us/ChildCareSearch/searchEarlyEdu.aspx">Massachusetts Department of Early Education and Care</a>. It tries to include all of the data from that site, but because of issues with locating some of the addresses on a map, not all of the providers are included here. <a href="http://www.eec.state.ma.us/ChildCareSearch/searchEarlyEdu.aspx">Try searching there</a> as well if you are not satisfied with what you find here.
+    </p>
+    <p>
+      This app is <a href="https://github.com/jimkang/daycare-map">open source</a>.
+    </p>
+  </div>
+</div>
 
 <script src="index.js"></script>
 

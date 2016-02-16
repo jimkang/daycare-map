@@ -3,6 +3,8 @@ daycare-map
 
 A map of Boston-area daycares using data from the Department of Early Education and Childcare.
 
+The API that feeds this app is in the <a href="https://github.com/jimkang/daycare-provider-api">daycare-provider-api project</a>.
+
 Installation
 ------------
 
