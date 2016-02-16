@@ -1,4 +1,4 @@
-daycare-map
+massdaycare
 ==================
 
 A map of Boston-area daycares using data from the Department of Early Education and Childcare.

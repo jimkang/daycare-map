@@ -1,5 +1,5 @@
 {
-  "name": "daycare-map",
+  "name": "massdaycare",
   "version": "1.0.0",
   "description": "A map of Boston-area daycares using data from the Department of Early Education and Childcare.",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:jimkang/daycare-map.git"
+    "url": "git@github.com:jimkang/massdaycare.git"
   },
   "keywords": [],
   "author": "Jim Kang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jimkang/daycare-map/issues"
+    "url": "https://github.com/jimkang/massdaycare/issues"
   },
-  "homepage": "https://github.com/jimkang/daycare-map",
+  "homepage": "https://github.com/jimkang/massdaycare",
   "devDependencies": {
     "call-next-tick": "^1.1.2",
     "level": "^1.4.0",
